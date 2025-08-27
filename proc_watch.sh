@@ -1,11 +1,19 @@
 #!/bin/bash
 
+cleanup() {
+	echo "Caught SIGINT, terminating..."
+	pkill -INT -f "./main processes.txt"
+	rm processes.txt
+    exit 1
+}
+trap cleanup SIGINT
+
 # Retrieve top 10 processes
 echo "Retrieving top 10 processes"
 processes=$(ps -eo pid,pcpu,pmem,rss,vsize,stat,ppid --sort -%cpu | head -11)
 
 # Save processes to a file
-echo "$processes" > processes.txt
+echo "$processes" | sed 's/  */ /g' | sed 's/^ *//' > processes.txt
 
 # Process each line
 echo "$processes" | while read -r line; do
